@@ -115,62 +115,64 @@ if [ $mode -eq 1 ]; then
     # Compiler for text files
     if [ "$type" -eq 1 ]; then
         case "$type2" in
-            1) query="inurl:pdf" ;;
-            2) query="inurl:doc OR inurl:docx" ;;
-            3) query="inurl:csv" ;;
-            4) query="inurl:txt" ;;
-            5) query="inurl:lst" ;;
-            6) query="inurl:pdf OR inurl:doc OR inurl:docx OR inurl:csv OR inurl:txt OR inurl:lst" ;;
+            1) query="filetype:pdf" ;;
+            2) query="filetype:doc OR docx" ;;
+            3) query="filetype:csv" ;;
+            4) query="filetype:txt" ;;
+            5) query="filetype:lst" ;;
+            6) query="filetype:pdf OR doc OR docx OR csv OR txt OR lst" ;;
         esac
     fi
 
     # Compiler for picture files
     if [ "$type" -eq 2 ]; then
         case "$type2" in
-            1) query="inurl:jpg OR inurl:jpeg" ;;
-            2) query="inurl:img" ;;
-            3) query="inurl:gif" ;;
-            4) query="inurl:png" ;;
-            5) query="inurl:bmp" ;;
-            6) query="inurl:webp" ;;
-            7) query="inurl:heif OR inurl:heic" ;;
-            8) query="inurl:tif OR inurl:tiff" ;;
-            9) query="inurl:jpg OR inurl:jpeg OR inurl:img OR inurl:gif OR inurl:png OR inurl:bmp OR inurl:webp OR inurl:heif OR inurl:heic OR inurl:tif OR inurl:tiff" ;;
+            1) query="filetype:jpg" ;;
+            2) query="filetype:img" ;;
+            3) query="filetype:gif" ;;
+            4) query="filetype:png" ;;
+            5) query="filetype:bmp" ;;
+            6) query="filetype:webp" ;;
+            7) query="filetype:heif OR heic" ;;
+            8) query="filetype:tif OR tiff" ;;
+            9) query="filetype:jpg OR jpeg OR img OR gif OR png OR bmp OR webp OR heif OR heic OR tif OR tiff" ;;
         esac
     fi
 
     # Compiler for chart files
     if [ "$type" -eq 3 ]; then
         case "$type2" in
-            1) query="inurl:xls OR inurl:xlsm" ;;
-            2) query="inurl:svg" ;;
-            3) query="inurl:pdf" ;;
-            4) query="inurl:json" ;;
-            5) query="inurl:twb OR inurl:twbx" ;;
-            6) query="inurl:vsdx" ;;
-            7) query="inurl:xls OR inurl:xlsm OR inurl:svg OR inurl:pdf OR inurl:json OR inurl:twb OR inurl:twbx OR inurl:vsdx OR inurl:csv" ;;
+            1) query="filetype:xls OR inurl:xlsm" ;;
+            2) query="filetype:svg" ;;
+            3) query="filetype:pdf" ;;
+            4) query="filetype:json" ;;
+            5) query="filetype:twb OR inurl:twbx" ;;
+            6) query="filetype:vsdx" ;;
+            7) query="filetype:xls OR xlsm OR svg OR pdf OR json OR twb OR twbx OR vsdx OR csv" ;;
         esac
     fi
 
     # Compiler for presentation files
     if [ "$type" -eq 4 ]; then
         case "$type2" in
-            1) query="inurl:ppt OR inurl:pptx" ;;
-            2) query="inurl:pdf" ;;
-            3) query="inurl:odp" ;;
-            4) query="inurl:key" ;;
-            5) query="inurl:html" ;;
-            6) query="inurl:swf" ;;
-            7) query="inurl:ppt OR inurl:pptx OR inurl:pdf OR inurl:odp OR inurl:key OR inurl:html OR inurl:swf" ;;
+            1) query="filetype:ppt OR pptx" ;;
+            2) query="filetype:pdf" ;;
+            3) query="filetype:odp" ;;
+            4) query="filetype:key" ;;
+            5) query="filetype:html" ;;
+            6) query="filetype:swf" ;;
+            7) query="filetype:ppt OR pptx OR pdf OR odp OR key OR html OR swf" ;;
         esac
     fi
 
     # Compiler for all files
     if [ "$type" -eq 5 ]; then
-        type2="inurl:pdf OR inurl:doc OR inurl:docx OR inurl:csv OR inurl:txt OR inurl:lst OR inurl:jpg OR inurl:jpeg OR inurl:img OR inurl:gif OR inurl:png OR inurl:bmp OR inurl:webp OR inurl:heif OR inurl:heic OR inurl:tif OR inurl:tiff OR inurl:xls OR inurl:xlsm OR inurl:svg OR inurl:json OR inurl:twb OR inurl:twbx OR filetype:vsdx OR inurl:odp OR inurl:key OR inurl:html OR inurl:swf"
+        type2="filetype:pdf OR doc OR docx OR csv OR txt OR lst OR jpg OR jpeg OR img OR gif OR png OR bmp OR webp OR heif OR heic OR tif OR tiff OR xls OR xlsm OR svg OR json OR twb OR twbx OR vsdx OR odp OR key OR html OR swf"
     fi
+    unquery=$(echo "$query" | sed 's/+/ /g' | sed 's/:/%3A/g' | sed 's/filetype:/ /g' | sed 's/OR/ /g' | sed 's/filetype%3A/ /g')
     echo "$query" | sed 's/ /+/g' | sed 's/:/%3A/g' > ./query.txt
-    query=$(cat ./query.txt | sed 's/ /+/g' | awk '{print "\"" $0 "\""}')
+    query=$(cat ./query.txt | sed 's/ /+/g')
+    
 fi
 }
 compiler
@@ -182,7 +184,7 @@ function key_word(){
     if [ $kword -z ]; then
         kword="$POI"
     else
-    kword=$(echo "$expression" | sed 's/ /+/g' | awk '{print "\"" $0 "\""}')
+    kword=$(echo "$expression" | sed 's/ /+/g')
     fi
 
 }
@@ -194,18 +196,18 @@ key_word
 
 function curl_request() {
     if [ "$mode" -eq 1 ]; then
-        echo "https://www.google.com/search?q=site%3A$targets+$query+insite%3A$kword"
+        echo "https://www.google.com/search?q=site%3A$targets+$query"
         
         # send request
         curl --http1.1 -G -A "$(shuf -n 1 ./user_agents.txt)" \
             -H "Accept-Language: en-US,en;q=0.5" \
             -H "Connection: keep-alive" \
-            "https://www.google.com/search?q=site%3A$targets+$query+$kword" > ./results.txt
+            "https://www.google.com/search?q=site%3A$targets+$query" > ./results.txt
         
         # Process the results and remove generic irrelevant results
         {
             sed 's/ /\n/g' ./results.txt | 
-            grep http | 
+            grep -e http -e $targets | 
             grep -v "https://encrypted" |
             grep -v refresh |
             grep -v 'faviconV2' | 
@@ -218,12 +220,17 @@ function curl_request() {
             awk -F'&amp' '{print $1}' |
             sort |
             uniq |
-            awk -F'http' '{print "[*] http" $2}' 
+            awk -F'http' '{print "[*] http" $2}' |
+            grep -v -w "http" 
+            
             
         } > ./final.txt
+            
         
-        cat ./final.txt
-
+        Downloadready=$(cat ./final.txt | grep -Eo 'https?://[^"]+\.[a-zA-Z0-9]{3,4}' | sort | uniq)
+        echo "$Downloadready" > ./final.txt 
+        echo "$Downloadready"
+    
     elif [ "$mode" -eq 2 ]; then
         echo "https://www.google.com/search?q=inurl%3A$POI"
         
@@ -265,11 +272,10 @@ if [ $mode -eq 1 ]; then
         echo -e "Extract files?\n[Y]es\n[N]o"
         read extract
         if [ $extract == "y" ]; then
-            for link in $(cat ./final.txt | grep $targets | awk '{print $2}'); do
+            for link in $(cat ./final.txt | grep -v 'gstatic'); do
                 echo "wget -P ./$targets $link"
                 wget -P ./$targets $link
-                sleep 3
-               
+                sleep 2
             done
         fi
     }

@@ -239,10 +239,12 @@ function curl_request() {
             -H "Accept-Language: en-US,en;q=0.5" \
             -H "Connection: keep-alive" \
             "https://www.google.com/search?q=inurl%3A$POI+$kword" > ./results.txt
+        echo -e "${yel}[!] searching with Sherlock, some results may double.${norm}"
+        sherlock $POI >> ./results.txt
         
         # Process the results and remove generic irrelevant results
         {
-            sed 's/ /\n/g' ./results.txt | 
+            sed -e 's/ /\n/g; s/<\/span><span//g; s/<\/span><span//g; s/,null//g; s/\[//g; s/\]//g'  ./results.txt | 
             grep http | 
             grep -v refresh | 
             grep -v "https://encrypted" |

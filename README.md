@@ -2,7 +2,7 @@
 A google dorks and curl based web scraper.
 
 this should work off the shelf for KALI users.
-if not, the dependencies are: curl and figlet.
+if not, the dependencies are: curl, figlet, sherlock.
 
 user_agents:
 in the same directory should be the user agents txt file which the script chooses at random with evry roll.
